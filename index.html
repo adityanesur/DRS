@@ -13,41 +13,67 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background: linear-gradient(135deg, #0a0f1e 0%, #0a1a2a 100%);
+            background: radial-gradient(circle at 20% 30%, #0a0f1e, #03060c);
             min-height: 100vh;
             color: #fff;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Animated Background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 20% 40%, rgba(230,126,34,0.08) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 70%, rgba(243,156,18,0.08) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
         }
 
         /* Main Container */
         .container {
-            max-width: 1400px;
+            max-width: 1600px;
             margin: 0 auto;
             padding: 20px;
+            position: relative;
+            z-index: 1;
         }
 
-        /* Header */
+        /* Premium Header */
         .header {
             text-align: center;
             margin-bottom: 30px;
-            padding: 20px;
-            background: rgba(255,255,255,0.05);
-            border-radius: 30px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.1);
+            padding: 24px 20px;
+            background: rgba(10, 15, 30, 0.6);
+            backdrop-filter: blur(20px);
+            border-radius: 40px;
+            border: 1px solid rgba(255,255,255,0.15);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
         }
 
         .header h1 {
             font-size: clamp(1.5rem, 5vw, 2.5rem);
-            background: linear-gradient(135deg, #e67e22, #f39c12);
+            background: linear-gradient(135deg, #e67e22, #f39c12, #e67e22);
+            background-size: 200% auto;
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
-            margin-bottom: 10px;
+            animation: shimmer 3s linear infinite;
+            margin-bottom: 8px;
+        }
+
+        @keyframes shimmer {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 200% 50%; }
         }
 
         .header p {
             opacity: 0.8;
-            font-size: clamp(0.8rem, 3vw, 1rem);
+            font-size: clamp(0.75rem, 2.5vw, 0.95rem);
         }
 
         /* Grid Layout */
@@ -63,65 +89,66 @@
             }
         }
 
-        /* Cards */
+        /* Premium Cards */
         .card {
-            background: rgba(18, 24, 38, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 30px;
+            background: rgba(18, 24, 38, 0.75);
+            backdrop-filter: blur(20px);
+            border-radius: 28px;
             overflow: hidden;
-            border: 1px solid rgba(255,255,255,0.1);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.12);
+            transition: all 0.3s ease;
+            box-shadow: 0 20px 40px -12px rgba(0,0,0,0.4);
         }
 
         .card-header {
-            padding: 20px 25px;
-            background: linear-gradient(135deg, rgba(230,126,34,0.2), rgba(243,156,18,0.1));
-            border-bottom: 2px solid rgba(230,126,34,0.5);
+            padding: 18px 22px;
+            background: linear-gradient(135deg, rgba(230,126,34,0.15), rgba(243,156,18,0.05));
+            border-bottom: 2px solid rgba(230,126,34,0.4);
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
-            gap: 15px;
+            gap: 12px;
         }
 
         .card-header h2 {
-            font-size: clamp(1.1rem, 4vw, 1.5rem);
+            font-size: clamp(1.1rem, 4vw, 1.4rem);
             display: flex;
             align-items: center;
             gap: 10px;
+            font-weight: 600;
         }
 
         /* Status Indicator */
         .status {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
             background: rgba(0,0,0,0.5);
-            padding: 8px 18px;
+            padding: 6px 16px;
             border-radius: 50px;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
+            font-weight: 500;
+            border: 1px solid rgba(255,255,255,0.1);
         }
 
         .status-dot {
-            width: 12px;
-            height: 12px;
+            width: 10px;
+            height: 10px;
             border-radius: 50%;
             background: #e74c3c;
+            box-shadow: 0 0 6px #e74c3c;
             animation: pulse 1.5s infinite;
         }
 
         .status-dot.active {
             background: #2ecc71;
+            box-shadow: 0 0 10px #2ecc71;
         }
 
         @keyframes pulse {
             0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.5; transform: scale(1.2); }
+            50% { opacity: 0.6; transform: scale(1.2); }
         }
 
         /* Video Container */
@@ -133,31 +160,152 @@
             overflow: hidden;
         }
 
-        #liveVideo, #replayPlayer {
+        .zoomable-video {
             width: 100%;
             height: 100%;
+            object-fit: contain;
+            transition: transform 0.2s ease-out;
+            transform-origin: center center;
+        }
+
+        #liveVideo {
             object-fit: cover;
         }
 
         #replayPlayer {
             object-fit: contain;
-            background: #000;
         }
 
-        /* Controls */
-        .controls-section {
-            padding: 20px;
+        /* External Controls - Responsive Side by Side */
+        .external-controls {
+            padding: 16px 20px;
+            background: linear-gradient(135deg, rgba(0,0,0,0.4), rgba(0,0,0,0.2));
+            border-top: 1px solid rgba(255,255,255,0.08);
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .controls-row {
             display: flex;
-            gap: 15px;
             justify-content: center;
+            align-items: center;
+            gap: 20px;
             flex-wrap: wrap;
         }
 
+        /* Zoom Section */
+        .zoom-section {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(0,0,0,0.6);
+            padding: 6px 16px;
+            border-radius: 50px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(230,126,34,0.3);
+        }
+
+        .zoom-section span {
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: rgba(255,255,255,0.9);
+        }
+
+        .zoom-percent {
+            font-family: monospace;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #e67e22;
+            min-width: 50px;
+            text-align: center;
+        }
+
+        /* Compact Buttons */
+        .ctrl-btn {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(230,126,34,0.9), rgba(243,156,18,0.9));
+            border: 1px solid rgba(255,255,255,0.2);
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+
+        .ctrl-btn:hover {
+            transform: scale(1.05);
+            background: linear-gradient(135deg, #e67e22, #f39c12);
+        }
+
+        .ctrl-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* Pan Section - Compact Grid */
+        .pan-section {
+            background: rgba(0,0,0,0.6);
+            padding: 6px 12px;
+            border-radius: 50px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.15);
+        }
+
+        .pan-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+        }
+
+        .pan-btn {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            background: rgba(52, 73, 94, 0.8);
+            border: 1px solid rgba(255,255,255,0.15);
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .pan-btn.reset {
+            background: linear-gradient(135deg, rgba(230,126,34,0.9), rgba(243,156,18,0.9));
+            font-size: 16px;
+        }
+
+        .pan-btn:hover {
+            background: rgba(230,126,34,0.9);
+            transform: scale(1.03);
+        }
+
+        .pan-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* Recording Controls */
+        .controls-section {
+            padding: 16px 20px;
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+            background: rgba(0,0,0,0.2);
+        }
+
         .btn {
-            padding: 12px 28px;
+            padding: 10px 24px;
             border: none;
             border-radius: 50px;
-            font-size: 1rem;
+            font-size: 0.9rem;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
@@ -170,10 +318,11 @@
         .btn-primary {
             background: linear-gradient(135deg, #e67e22, #f39c12);
             color: white;
-            box-shadow: 0 4px 15px rgba(230,126,34,0.3);
+            box-shadow: 0 4px 12px rgba(230,126,34,0.3);
+            border: 1px solid rgba(255,255,255,0.2);
         }
 
-        .btn-primary:hover {
+        .btn-primary:hover:not(:disabled) {
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(230,126,34,0.4);
         }
@@ -181,20 +330,16 @@
         .btn-danger {
             background: linear-gradient(135deg, #e74c3c, #c0392b);
             color: white;
-        }
-
-        .btn-secondary {
-            background: rgba(52, 73, 94, 0.8);
-            color: white;
             border: 1px solid rgba(255,255,255,0.2);
         }
 
-        .btn-secondary:hover {
-            background: rgba(52, 73, 94, 1);
+        .btn-danger:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(231,76,60,0.4);
         }
 
         .btn:active {
-            transform: scale(0.95);
+            transform: scale(0.96);
         }
 
         .btn:disabled {
@@ -205,16 +350,16 @@
 
         /* Buffer Info */
         .buffer-info {
-            padding: 15px 20px;
+            padding: 14px 20px;
             background: rgba(0,0,0,0.3);
+            margin: 14px;
             border-radius: 20px;
-            margin: 15px;
             text-align: center;
         }
 
         .progress-bar {
             width: 100%;
-            height: 8px;
+            height: 6px;
             background: rgba(255,255,255,0.1);
             border-radius: 10px;
             overflow: hidden;
@@ -231,7 +376,7 @@
 
         /* Frame Controls */
         .frame-controls {
-            padding: 20px;
+            padding: 16px 20px;
             background: rgba(0,0,0,0.3);
             display: flex;
             flex-wrap: wrap;
@@ -243,35 +388,38 @@
             display: flex;
             gap: 10px;
             background: rgba(0,0,0,0.5);
-            padding: 8px 15px;
-            border-radius: 60px;
+            padding: 6px 16px;
+            border-radius: 50px;
             align-items: center;
+            flex-wrap: wrap;
+            justify-content: center;
         }
 
         .frame-btn {
             background: rgba(230,126,34,0.2);
             border: 1px solid rgba(230,126,34,0.5);
-            padding: 10px 20px;
+            padding: 8px 18px;
             border-radius: 40px;
             cursor: pointer;
             transition: all 0.2s;
             color: white;
             font-weight: 600;
+            font-size: 0.85rem;
         }
 
         .frame-btn:hover {
-            background: rgba(230,126,34,0.4);
-            transform: scale(1.05);
+            background: rgba(230,126,34,0.5);
+            transform: scale(1.02);
         }
 
         .time-info {
             text-align: center;
-            padding: 15px;
+            padding: 14px;
             font-family: monospace;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             background: rgba(0,0,0,0.3);
             border-radius: 20px;
-            margin: 15px;
+            margin: 14px;
         }
 
         /* Message */
@@ -279,17 +427,19 @@
             position: fixed;
             top: 20px;
             right: 20px;
-            padding: 15px 25px;
+            padding: 12px 24px;
             border-radius: 50px;
-            background: rgba(0,0,0,0.9);
-            backdrop-filter: blur(10px);
+            background: rgba(0,0,0,0.95);
+            backdrop-filter: blur(16px);
             z-index: 1000;
-            animation: slideIn 0.3s ease;
+            animation: slideInRight 0.3s ease;
             max-width: 90%;
-            word-wrap: break-word;
+            font-weight: 500;
+            font-size: 0.85rem;
+            border: 1px solid rgba(255,255,255,0.2);
         }
 
-        @keyframes slideIn {
+        @keyframes slideInRight {
             from {
                 transform: translateX(100%);
                 opacity: 0;
@@ -300,37 +450,125 @@
             }
         }
 
-        /* Responsive */
+        /* Responsive Design - Top Priority */
         @media (max-width: 768px) {
             .container {
-                padding: 15px;
+                padding: 12px;
+            }
+            
+            .controls-row {
+                gap: 12px;
+            }
+            
+            .zoom-section {
+                padding: 5px 12px;
+            }
+            
+            .ctrl-btn {
+                width: 34px;
+                height: 34px;
+                font-size: 16px;
+            }
+            
+            .pan-btn {
+                width: 38px;
+                height: 38px;
+                font-size: 16px;
+                border-radius: 10px;
+            }
+            
+            .pan-btn.reset {
+                font-size: 14px;
+            }
+            
+            .zoom-percent {
+                font-size: 0.75rem;
+                min-width: 45px;
             }
             
             .btn {
-                padding: 10px 20px;
-                font-size: 0.9rem;
-            }
-            
-            .frame-btn {
-                padding: 8px 16px;
+                padding: 8px 18px;
                 font-size: 0.85rem;
             }
             
+            .frame-btn {
+                padding: 6px 14px;
+                font-size: 0.8rem;
+            }
+            
             .card-header {
-                padding: 15px;
+                padding: 14px 18px;
             }
         }
 
-        @media (max-width: 480px) {
-            .frame-controls {
+        @media (max-width: 580px) {
+            .controls-row {
                 flex-direction: column;
-                align-items: center;
+                width: 100%;
+                gap: 12px;
+            }
+            
+            .zoom-section {
+                width: auto;
+                justify-content: center;
+            }
+            
+            .pan-section {
+                width: auto;
+            }
+            
+            .pan-grid {
+                gap: 8px;
+            }
+            
+            .pan-btn {
+                width: 50px;
+                height: 50px;
+                font-size: 20px;
             }
             
             .frame-btn-group {
                 width: 100%;
                 justify-content: center;
             }
+            
+            .frame-btn {
+                flex: 1;
+                text-align: center;
+                padding: 8px 12px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .pan-btn {
+                width: 45px;
+                height: 45px;
+                font-size: 18px;
+            }
+            
+            .ctrl-btn {
+                width: 38px;
+                height: 38px;
+            }
+            
+            .zoom-section span {
+                font-size: 0.7rem;
+            }
+        }
+
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(230,126,34,0.5);
+            border-radius: 10px;
         }
     </style>
 </head>
@@ -338,7 +576,7 @@
 <div class="container">
     <div class="header">
         <h1>🏏 DRS Review System</h1>
-        <p>Professional Cricket Replay Analysis | Rolling 5-Minute Buffer | Frame-by-Frame Review</p>
+        <p>Professional Cricket Replay | Rolling 5-Min Buffer | Frame-by-Frame | Precision Zoom & Pan</p>
     </div>
 
     <div class="grid">
@@ -352,15 +590,42 @@
                 </div>
             </div>
             <div class="video-container">
-                <video id="liveVideo" autoplay playsinline muted></video>
+                <video id="liveVideo" autoplay playsinline muted class="zoomable-video"></video>
             </div>
+            
+            <div class="external-controls">
+                <div class="controls-row">
+                    <div class="zoom-section">
+                        <span>🔍 ZOOM</span>
+                        <button class="ctrl-btn" id="liveZoomOut">−</button>
+                        <button class="ctrl-btn" id="liveZoomReset">⟳</button>
+                        <button class="ctrl-btn" id="liveZoomIn">+</button>
+                        <span class="zoom-percent" id="liveZoomPercent">100%</span>
+                    </div>
+                    
+                    <div class="pan-section">
+                        <div class="pan-grid">
+                            <div></div>
+                            <button class="pan-btn" id="livePanUp">▲</button>
+                            <div></div>
+                            <button class="pan-btn" id="livePanLeft">◀</button>
+                            <button class="pan-btn reset" id="livePanReset">●</button>
+                            <button class="pan-btn" id="livePanRight">▶</button>
+                            <div></div>
+                            <button class="pan-btn" id="livePanDown">▼</button>
+                            <div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
             <div class="controls-section">
-                <button id="startBtn" class="btn btn-primary">▶️ Start Recording</button>
-                <button id="stopBtn" class="btn btn-danger" disabled>⏹️ Stop Recording</button>
+                <button id="startBtn" class="btn btn-primary">▶ Start Recording</button>
+                <button id="stopBtn" class="btn btn-danger" disabled>⏹ Stop Recording</button>
                 <button id="reviewBtn" class="btn btn-primary" disabled>⚡ Review Last 5min</button>
             </div>
             <div class="buffer-info">
-                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
                     <span>📊 Buffer Status</span>
                     <span id="bufferInfo">0s / 300s</span>
                 </div>
@@ -374,19 +639,46 @@
         <div class="card" id="replayCard" style="display: none;">
             <div class="card-header">
                 <h2>🎬 Replay Analysis</h2>
-                <span id="replayDuration" style="font-size: 0.85rem; opacity: 0.8;"></span>
+                <span id="replayDuration" style="font-size: 0.75rem; opacity: 0.8;"></span>
             </div>
             <div class="video-container">
-                <video id="replayPlayer" controls playsinline></video>
+                <video id="replayPlayer" controls playsinline class="zoomable-video"></video>
             </div>
+            
+            <div class="external-controls">
+                <div class="controls-row">
+                    <div class="zoom-section">
+                        <span>🔍 ZOOM</span>
+                        <button class="ctrl-btn" id="replayZoomOut">−</button>
+                        <button class="ctrl-btn" id="replayZoomReset">⟳</button>
+                        <button class="ctrl-btn" id="replayZoomIn">+</button>
+                        <span class="zoom-percent" id="replayZoomPercent">100%</span>
+                    </div>
+                    
+                    <div class="pan-section">
+                        <div class="pan-grid">
+                            <div></div>
+                            <button class="pan-btn" id="replayPanUp">▲</button>
+                            <div></div>
+                            <button class="pan-btn" id="replayPanLeft">◀</button>
+                            <button class="pan-btn reset" id="replayPanReset">●</button>
+                            <button class="pan-btn" id="replayPanRight">▶</button>
+                            <div></div>
+                            <button class="pan-btn" id="replayPanDown">▼</button>
+                            <div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
             <div class="frame-controls">
                 <div class="frame-btn-group">
                     <button id="prevFrameBtn" class="frame-btn">⏪ Prev Frame</button>
                     <button id="nextFrameBtn" class="frame-btn">Next Frame ⏩</button>
                 </div>
                 <div class="frame-btn-group">
-                    <button id="fastPrevBtn" class="frame-btn">⏪⏪ Fast Prev (0.5s)</button>
-                    <button id="fastNextBtn" class="frame-btn">Fast Next (0.5s) ⏩⏩</button>
+                    <button id="fastPrevBtn" class="frame-btn">⏪⏪ Fast Prev</button>
+                    <button id="fastNextBtn" class="frame-btn">Fast Next ⏩⏩</button>
                 </div>
             </div>
             <div class="time-info" id="frameTimeInfo">
@@ -415,359 +707,321 @@
         const replayDurationSpan = document.getElementById('replayDuration');
         const statusDot = document.getElementById('statusDot');
         const statusText = document.getElementById('statusText');
+        const liveZoomPercent = document.getElementById('liveZoomPercent');
+        const replayZoomPercent = document.getElementById('replayZoomPercent');
 
+        // Zoom and Pan variables
+        let liveZoom = 1;
+        let replayZoom = 1;
+        let livePanX = 0, livePanY = 0;
+        let replayPanX = 0, replayPanY = 0;
+        
         // Recording variables
-        let mediaRecorder = null;
         let recordedChunks = [];
         let totalBufferDuration = 0;
         let stream = null;
         let isRecording = false;
+        let canvasRecorder = null;
         
         const MAX_BUFFER_SECONDS = 300;
-        let currentReplayVideo = null;
         let messageTimeout = null;
 
-        // Show message
-        function showMessage(msg, isError = false) {
-            const existingMsg = document.querySelector('.message');
-            if (existingMsg) existingMsg.remove();
-            
-            const messageDiv = document.createElement('div');
-            messageDiv.className = 'message';
-            messageDiv.style.background = isError ? 'rgba(231, 76, 60, 0.95)' : 'rgba(46, 204, 113, 0.95)';
-            messageDiv.textContent = msg;
-            document.body.appendChild(messageDiv);
-            
-            if (messageTimeout) clearTimeout(messageTimeout);
-            messageTimeout = setTimeout(() => {
-                if (messageDiv) messageDiv.remove();
-            }, 3000);
+        function applyTransform(videoElement, zoom, panX, panY, updatePercent = null, percentElement = null) {
+            if (!videoElement) return;
+            videoElement.style.transform = `scale(${zoom}) translate(${panX / zoom}px, ${panY / zoom}px)`;
+            if (updatePercent && percentElement) {
+                percentElement.textContent = `${Math.round(zoom * 100)}%`;
+            }
         }
 
-        // Update buffer display
-        function updateBufferDisplay() {
-            const percentage = (totalBufferDuration / MAX_BUFFER_SECONDS) * 100;
-            bufferInfo.textContent = `${Math.floor(totalBufferDuration)}s / ${MAX_BUFFER_SECONDS}s`;
-            bufferProgress.style.width = `${Math.min(100, percentage)}%`;
-        }
-
-        // Maintain buffer limit
-        function maintainBufferLimit() {
-            while (totalBufferDuration > MAX_BUFFER_SECONDS && recordedChunks.length > 0) {
-                const oldestChunk = recordedChunks.shift();
-                totalBufferDuration -= oldestChunk.duration;
-                if (oldestChunk.url) {
-                    URL.revokeObjectURL(oldestChunk.url);
+        // Setup live controls
+        function setupLiveControls() {
+            document.getElementById('liveZoomIn').onclick = () => {
+                liveZoom = Math.min(liveZoom + 0.2, 3);
+                applyTransform(liveVideo, liveZoom, livePanX, livePanY, true, liveZoomPercent);
+                showMessage(`Zoom: ${Math.round(liveZoom * 100)}%`, false);
+                updateCanvasRecording();
+            };
+            
+            document.getElementById('liveZoomOut').onclick = () => {
+                liveZoom = Math.max(liveZoom - 0.2, 1);
+                if (liveZoom === 1) { livePanX = 0; livePanY = 0; }
+                applyTransform(liveVideo, liveZoom, livePanX, livePanY, true, liveZoomPercent);
+                showMessage(`Zoom: ${Math.round(liveZoom * 100)}%`, false);
+                updateCanvasRecording();
+            };
+            
+            document.getElementById('liveZoomReset').onclick = () => {
+                liveZoom = 1; livePanX = 0; livePanY = 0;
+                applyTransform(liveVideo, liveZoom, livePanX, livePanY, true, liveZoomPercent);
+                showMessage('Zoom reset', false);
+                updateCanvasRecording();
+            };
+            
+            const panBtns = ['PanUp', 'PanDown', 'PanLeft', 'PanRight', 'PanReset'];
+            panBtns.forEach(btn => {
+                const el = document.getElementById(`live${btn}`);
+                if (el) {
+                    el.onclick = () => {
+                        if (liveZoom <= 1 && btn !== 'PanReset') return;
+                        switch(btn) {
+                            case 'PanUp': livePanY += 30; showMessage('Panned up', false); break;
+                            case 'PanDown': livePanY -= 30; showMessage('Panned down', false); break;
+                            case 'PanLeft': livePanX += 30; showMessage('Panned left', false); break;
+                            case 'PanRight': livePanX -= 30; showMessage('Panned right', false); break;
+                            case 'PanReset': livePanX = 0; livePanY = 0; showMessage('Pan reset', false); break;
+                        }
+                        applyTransform(liveVideo, liveZoom, livePanX, livePanY);
+                        updateCanvasRecording();
+                    };
                 }
+            });
+        }
+
+        // Setup replay controls
+        function setupReplayControls() {
+            document.getElementById('replayZoomIn').onclick = () => {
+                replayZoom = Math.min(replayZoom + 0.2, 3);
+                applyTransform(replayPlayer, replayZoom, replayPanX, replayPanY, true, replayZoomPercent);
+                showMessage(`Zoom: ${Math.round(replayZoom * 100)}%`, false);
+            };
+            
+            document.getElementById('replayZoomOut').onclick = () => {
+                replayZoom = Math.max(replayZoom - 0.2, 1);
+                if (replayZoom === 1) { replayPanX = 0; replayPanY = 0; }
+                applyTransform(replayPlayer, replayZoom, replayPanX, replayPanY, true, replayZoomPercent);
+                showMessage(`Zoom: ${Math.round(replayZoom * 100)}%`, false);
+            };
+            
+            document.getElementById('replayZoomReset').onclick = () => {
+                replayZoom = 1; replayPanX = 0; replayPanY = 0;
+                applyTransform(replayPlayer, replayZoom, replayPanX, replayPanY, true, replayZoomPercent);
+                showMessage('Zoom reset', false);
+            };
+            
+            const panBtns = ['PanUp', 'PanDown', 'PanLeft', 'PanRight', 'PanReset'];
+            panBtns.forEach(btn => {
+                const el = document.getElementById(`replay${btn}`);
+                if (el) {
+                    el.onclick = () => {
+                        if (replayZoom <= 1 && btn !== 'PanReset') return;
+                        switch(btn) {
+                            case 'PanUp': replayPanY += 30; showMessage('Panned up', false); break;
+                            case 'PanDown': replayPanY -= 30; showMessage('Panned down', false); break;
+                            case 'PanLeft': replayPanX += 30; showMessage('Panned left', false); break;
+                            case 'PanRight': replayPanX -= 30; showMessage('Panned right', false); break;
+                            case 'PanReset': replayPanX = 0; replayPanY = 0; showMessage('Pan reset', false); break;
+                        }
+                        applyTransform(replayPlayer, replayZoom, replayPanX, replayPanY);
+                    };
+                }
+            });
+        }
+
+        // Canvas recording
+        let recordingCanvas = null, recordingCtx = null, canvasStreamActive = false;
+        
+        function captureZoomedFrame() {
+            if (!liveVideo.videoWidth) return null;
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            const vw = liveVideo.videoWidth, vh = liveVideo.videoHeight;
+            const vw2 = vw / liveZoom, vh2 = vh / liveZoom;
+            let sx = (vw / 2) - (vw2 / 2) - (livePanX / liveZoom);
+            let sy = (vh / 2) - (vh2 / 2) - (livePanY / liveZoom);
+            sx = Math.max(0, Math.min(sx, vw - vw2));
+            sy = Math.max(0, Math.min(sy, vh - vh2));
+            canvas.width = vw; canvas.height = vh;
+            ctx.drawImage(liveVideo, sx, sy, vw2, vh2, 0, 0, vw, vh);
+            return canvas;
+        }
+        
+        function updateCanvasRecording() {
+            if (!isRecording || !recordingCanvas) return;
+            const captured = captureZoomedFrame();
+            if (captured) recordingCtx.drawImage(captured, 0, 0, recordingCanvas.width, recordingCanvas.height);
+        }
+        
+        function startCanvasRecording() {
+            if (recordingCanvas) return;
+            recordingCanvas = document.createElement('canvas');
+            recordingCtx = recordingCanvas.getContext('2d');
+            recordingCanvas.width = liveVideo.videoWidth || 1280;
+            recordingCanvas.height = liveVideo.videoHeight || 720;
+            canvasStreamActive = true;
+            function captureLoop() {
+                if (!canvasStreamActive) return;
+                updateCanvasRecording();
+                requestAnimationFrame(captureLoop);
+            }
+            captureLoop();
+            return recordingCanvas.captureStream(30);
+        }
+        
+        function stopCanvasRecording() {
+            canvasStreamActive = false;
+            recordingCanvas = null;
+            recordingCtx = null;
+        }
+        
+        function setupMediaRecorderWithCanvas(mediaStream) {
+            try {
+                const mimeTypes = ['video/mp4', 'video/webm;codecs=h264', 'video/webm'];
+                let selected = '';
+                for (let m of mimeTypes) if (MediaRecorder.isTypeSupported(m)) { selected = m; break; }
+                canvasRecorder = new MediaRecorder(mediaStream, selected ? { mimeType: selected } : {});
+                canvasRecorder.ondataavailable = (e) => { if (e.data?.size) addChunkToBuffer(e.data, 2.0); };
+                canvasRecorder.start(2000);
+                return true;
+            } catch (err) { showMessage('Recorder error', true); return false; }
+        }
+
+        function showMessage(msg, isError = false) {
+            const existing = document.querySelector('.message');
+            if (existing) existing.remove();
+            const div = document.createElement('div');
+            div.className = 'message';
+            div.style.background = isError ? 'rgba(231,76,60,0.95)' : 'rgba(46,204,113,0.95)';
+            div.textContent = msg;
+            document.body.appendChild(div);
+            if (messageTimeout) clearTimeout(messageTimeout);
+            messageTimeout = setTimeout(() => div.remove(), 2500);
+        }
+
+        function updateBufferDisplay() {
+            const percent = (totalBufferDuration / MAX_BUFFER_SECONDS) * 100;
+            bufferInfo.textContent = `${Math.floor(totalBufferDuration)}s / ${MAX_BUFFER_SECONDS}s`;
+            bufferProgress.style.width = `${Math.min(100, percent)}%`;
+        }
+
+        function maintainBufferLimit() {
+            while (totalBufferDuration > MAX_BUFFER_SECONDS && recordedChunks.length) {
+                const oldest = recordedChunks.shift();
+                totalBufferDuration -= oldest.duration;
+                if (oldest.url) URL.revokeObjectURL(oldest.url);
             }
             updateBufferDisplay();
         }
 
-        // Add chunk to buffer
         function addChunkToBuffer(blob, duration) {
-            if (!blob || blob.size === 0) return;
-            
+            if (!blob?.size) return;
             const url = URL.createObjectURL(blob);
-            recordedChunks.push({
-                blob: blob,
-                url: url,
-                duration: duration,
-                timestamp: Date.now()
-            });
-            
+            recordedChunks.push({ blob, url, duration, timestamp: Date.now() });
             totalBufferDuration += duration;
             maintainBufferLimit();
-            
-            // Enable review button if we have at least 5 seconds of video
-            if (totalBufferDuration >= 5 && reviewBtn.disabled) {
-                reviewBtn.disabled = false;
-            }
+            if (totalBufferDuration >= 5 && reviewBtn.disabled) reviewBtn.disabled = false;
         }
 
-        // Combine chunks
         async function combineVideoChunks() {
-            if (recordedChunks.length === 0) {
-                throw new Error("No video data available");
-            }
-            
-            const blobs = recordedChunks.map(chunk => chunk.blob);
-            return new Blob(blobs, { type: 'video/mp4' });
+            if (!recordedChunks.length) throw new Error("No video data");
+            return new Blob(recordedChunks.map(c => c.blob), { type: 'video/mp4' });
         }
 
-        // Setup MediaRecorder
-        function setupMediaRecorder(mediaStream) {
-            try {
-                const mimeTypes = [
-                    'video/mp4',
-                    'video/webm;codecs=h264',
-                    'video/webm;codecs=vp8',
-                    'video/webm'
-                ];
-                
-                let selectedMime = '';
-                for (let mime of mimeTypes) {
-                    if (MediaRecorder.isTypeSupported(mime)) {
-                        selectedMime = mime;
-                        break;
-                    }
-                }
-                
-                const options = selectedMime ? { mimeType: selectedMime } : {};
-                mediaRecorder = new MediaRecorder(mediaStream, options);
-                
-                let chunkStartTime = null;
-                
-                mediaRecorder.ondataavailable = (event) => {
-                    if (event.data && event.data.size > 0) {
-                        const chunkEndTime = Date.now() / 1000;
-                        let duration = 2.0;
-                        
-                        if (chunkStartTime) {
-                            duration = chunkEndTime - chunkStartTime;
-                        }
-                        chunkStartTime = chunkEndTime;
-                        
-                        addChunkToBuffer(event.data, duration);
-                    }
-                };
-                
-                mediaRecorder.onerror = (event) => {
-                    console.error('MediaRecorder error:', event);
-                    showMessage('Recording error occurred', true);
-                };
-                
-                mediaRecorder.start(2000);
-                chunkStartTime = Date.now() / 1000;
-                
-                return true;
-            } catch (err) {
-                console.error('Failed to setup MediaRecorder:', err);
-                showMessage('Failed to setup recorder: ' + err.message, true);
-                return false;
-            }
-        }
-
-        // Start recording
         async function startRecording() {
             if (isRecording) return;
-            
             try {
-                // Request camera access
-                const constraints = {
-                    video: {
-                        facingMode: { exact: "environment" },
-                        width: { ideal: 1280 },
-                        height: { ideal: 720 }
-                    },
-                    audio: false
-                };
-                
-                try {
-                    stream = await navigator.mediaDevices.getUserMedia(constraints);
-                } catch (err) {
-                    console.warn('Rear camera failed, trying default:', err);
-                    stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
-                }
-                
+                const constraints = { video: { facingMode: { exact: "environment" }, width: { ideal: 1280 }, height: { ideal: 720 } }, audio: false };
+                try { stream = await navigator.mediaDevices.getUserMedia(constraints); }
+                catch { stream = await navigator.mediaDevices.getUserMedia({ video: true }); }
                 liveVideo.srcObject = stream;
                 await liveVideo.play();
-                
-                // Setup recorder
-                if (setupMediaRecorder(stream)) {
+                await new Promise(resolve => liveVideo.videoWidth ? resolve() : liveVideo.addEventListener('loadedmetadata', resolve, { once: true }));
+                const canvasStream = startCanvasRecording();
+                if (canvasStream && setupMediaRecorderWithCanvas(canvasStream)) {
                     isRecording = true;
                     startBtn.disabled = true;
                     stopBtn.disabled = false;
                     statusDot.classList.add('active');
                     statusText.textContent = 'Recording';
-                    showMessage('🎥 Recording started - Rolling 5-minute buffer active', false);
+                    showMessage('🎥 Recording started with Zoom/Pan', false);
                 }
-                
-            } catch (err) {
-                console.error('Start recording error:', err);
-                showMessage('Cannot access camera: ' + err.message, true);
-            }
+            } catch (err) { showMessage('Camera error: ' + err.message, true); }
         }
 
-        // Stop recording
         function stopRecording() {
             if (!isRecording) return;
-            
-            if (mediaRecorder && mediaRecorder.state === 'recording') {
-                mediaRecorder.stop();
-            }
-            
-            if (stream) {
-                stream.getTracks().forEach(track => track.stop());
-                stream = null;
-            }
-            
+            if (canvasRecorder?.state === 'recording') canvasRecorder.stop();
+            if (stream) stream.getTracks().forEach(t => t.stop());
+            stopCanvasRecording();
             isRecording = false;
             startBtn.disabled = false;
             stopBtn.disabled = true;
-            reviewBtn.disabled = false;
             statusDot.classList.remove('active');
             statusText.textContent = 'Stopped';
             liveVideo.srcObject = null;
-            
-            showMessage('⏹️ Recording stopped - Buffer preserved for review', false);
+            showMessage('Recording stopped - Buffer preserved', false);
         }
 
-        // Review functionality
         async function reviewLast5Minutes() {
-            if (recordedChunks.length === 0) {
-                showMessage('Buffer is empty. Please record some video first.', true);
-                return;
-            }
-            
+            if (!recordedChunks.length) { showMessage('Buffer empty. Record first.', true); return; }
             try {
                 reviewBtn.disabled = true;
-                reviewBtn.textContent = "⏳ Creating replay...";
-                
-                const combinedBlob = await combineVideoChunks();
-                
-                if (combinedBlob.size === 0) {
-                    throw new Error('Created video is empty');
-                }
-                
-                const videoURL = URL.createObjectURL(combinedBlob);
-                
-                if (replayPlayer.src && replayPlayer.src.startsWith('blob:')) {
-                    URL.revokeObjectURL(replayPlayer.src);
-                }
-                
-                replayPlayer.src = videoURL;
+                reviewBtn.textContent = "⏳ Creating...";
+                const combined = await combineVideoChunks();
+                if (!combined.size) throw new Error('Empty video');
+                const url = URL.createObjectURL(combined);
+                if (replayPlayer.src?.startsWith('blob:')) URL.revokeObjectURL(replayPlayer.src);
+                replayPlayer.src = url;
                 replayCard.style.display = 'block';
-                
                 replayPlayer.onloadedmetadata = () => {
-                    const duration = replayPlayer.duration;
-                    replayDurationSpan.textContent = `Duration: ${Math.floor(duration)}s`;
-                    showMessage(`✅ Replay ready: ${Math.floor(duration)} seconds available`, false);
+                    replayDurationSpan.textContent = `Duration: ${Math.floor(replayPlayer.duration)}s`;
+                    showMessage(`✅ Replay: ${Math.floor(replayPlayer.duration)}s`, false);
                     setupFrameStepping(replayPlayer);
                 };
-                
                 await replayPlayer.play();
                 replayCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                
                 reviewBtn.disabled = false;
                 reviewBtn.textContent = "⚡ Review Last 5min";
-                
-            } catch (err) {
-                console.error('Review error:', err);
-                showMessage('Failed to create replay: ' + err.message, true);
-                reviewBtn.disabled = false;
-                reviewBtn.textContent = "⚡ Review Last 5min";
-            }
+            } catch (err) { showMessage('Replay failed: ' + err.message, true); reviewBtn.disabled = false; reviewBtn.textContent = "⚡ Review Last 5min"; }
         }
 
-        // Frame stepping functionality
-        function setupFrameStepping(videoElement) {
-            currentReplayVideo = videoElement;
-            
-            function updateFrameInfo() {
-                if (!videoElement.duration || isNaN(videoElement.duration)) {
-                    frameTimeInfo.textContent = `⏱️ Frame: -- / -- | Time: --:--`;
-                    return;
-                }
-                
-                const fps = 30;
-                const totalFrames = Math.floor(videoElement.duration * fps);
-                const currentFrame = Math.floor(videoElement.currentTime * fps);
-                const minutes = Math.floor(videoElement.currentTime / 60);
-                const seconds = Math.floor(videoElement.currentTime % 60);
-                
-                frameTimeInfo.textContent = `⏱️ Frame: ${currentFrame + 1} / ${totalFrames} | Time: ${minutes}:${seconds.toString().padStart(2, '0')}`;
+        function setupFrameStepping(video) {
+            function update() {
+                if (!video.duration || isNaN(video.duration)) { frameTimeInfo.textContent = `⏱️ Frame: -- / -- | Time: --:--`; return; }
+                const fps = 30, total = Math.floor(video.duration * fps), current = Math.floor(video.currentTime * fps);
+                const mins = Math.floor(video.currentTime / 60), secs = Math.floor(video.currentTime % 60);
+                frameTimeInfo.textContent = `⏱️ Frame: ${current + 1} / ${total} | Time: ${mins}:${secs.toString().padStart(2, '0')}`;
             }
+            function prev() { if (video.duration) { video.currentTime = Math.max(0, video.currentTime - 1/30); video.pause(); update(); } }
+            function next() { if (video.duration) { video.currentTime = Math.min(video.duration, video.currentTime + 1/30); video.pause(); update(); } }
+            function fastPrev() { if (video.duration) { video.currentTime = Math.max(0, video.currentTime - 0.5); video.pause(); update(); showMessage('⏪ Back 0.5s', false); } }
+            function fastNext() { if (video.duration) { video.currentTime = Math.min(video.duration, video.currentTime + 0.5); video.pause(); update(); showMessage('⏩ Forward 0.5s', false); } }
             
-            function goToPreviousFrame() {
-                if (!videoElement.duration) return;
-                const frameTime = 1 / 30;
-                let newTime = videoElement.currentTime - frameTime;
-                if (newTime < 0) newTime = 0;
-                videoElement.currentTime = newTime;
-                videoElement.pause();
-                updateFrameInfo();
-            }
-            
-            function goToNextFrame() {
-                if (!videoElement.duration) return;
-                const frameTime = 1 / 30;
-                let newTime = videoElement.currentTime + frameTime;
-                if (newTime > videoElement.duration) newTime = videoElement.duration;
-                videoElement.currentTime = newTime;
-                videoElement.pause();
-                updateFrameInfo();
-            }
-            
-            function goToFastPrev() {
-                if (!videoElement.duration) return;
-                let newTime = videoElement.currentTime - 0.5;
-                if (newTime < 0) newTime = 0;
-                videoElement.currentTime = newTime;
-                videoElement.pause();
-                updateFrameInfo();
-                showMessage('⏪ Jumped back 0.5 seconds', false);
-            }
-            
-            function goToFastNext() {
-                if (!videoElement.duration) return;
-                let newTime = videoElement.currentTime + 0.5;
-                if (newTime > videoElement.duration) newTime = videoElement.duration;
-                videoElement.currentTime = newTime;
-                videoElement.pause();
-                updateFrameInfo();
-                showMessage('⏩ Jumped forward 0.5 seconds', false);
-            }
-            
-            // Remove old listeners and add new ones
-            const newPrev = prevFrameBtn.cloneNode(true);
-            const newNext = nextFrameBtn.cloneNode(true);
-            const newFastPrev = fastPrevBtn.cloneNode(true);
-            const newFastNext = fastNextBtn.cloneNode(true);
-            
+            const newPrev = prevFrameBtn.cloneNode(true), newNext = nextFrameBtn.cloneNode(true);
+            const newFastPrev = fastPrevBtn.cloneNode(true), newFastNext = fastNextBtn.cloneNode(true);
             prevFrameBtn.parentNode.replaceChild(newPrev, prevFrameBtn);
             nextFrameBtn.parentNode.replaceChild(newNext, nextFrameBtn);
             fastPrevBtn.parentNode.replaceChild(newFastPrev, fastPrevBtn);
             fastNextBtn.parentNode.replaceChild(newFastNext, fastNextBtn);
             
-            document.getElementById('prevFrameBtn').onclick = (e) => { e.preventDefault(); goToPreviousFrame(); };
-            document.getElementById('nextFrameBtn').onclick = (e) => { e.preventDefault(); goToNextFrame(); };
-            document.getElementById('fastPrevBtn').onclick = (e) => { e.preventDefault(); goToFastPrev(); };
-            document.getElementById('fastNextBtn').onclick = (e) => { e.preventDefault(); goToFastNext(); };
-            
-            videoElement.addEventListener('timeupdate', updateFrameInfo);
-            videoElement.addEventListener('seeked', updateFrameInfo);
-            
-            if (videoElement.readyState >= 1) {
-                updateFrameInfo();
-            } else {
-                videoElement.addEventListener('loadedmetadata', updateFrameInfo, { once: true });
-            }
+            document.getElementById('prevFrameBtn').onclick = (e) => { e.preventDefault(); prev(); };
+            document.getElementById('nextFrameBtn').onclick = (e) => { e.preventDefault(); next(); };
+            document.getElementById('fastPrevBtn').onclick = (e) => { e.preventDefault(); fastPrev(); };
+            document.getElementById('fastNextBtn').onclick = (e) => { e.preventDefault(); fastNext(); };
+            video.addEventListener('timeupdate', update);
+            video.addEventListener('seeked', update);
+            if (video.readyState >= 1) update();
+            else video.addEventListener('loadedmetadata', update, { once: true });
         }
 
-        // Cleanup
         function cleanup() {
-            if (mediaRecorder && mediaRecorder.state === 'recording') {
-                mediaRecorder.stop();
-            }
-            if (stream) {
-                stream.getTracks().forEach(track => track.stop());
-            }
-            recordedChunks.forEach(chunk => {
-                if (chunk.url) URL.revokeObjectURL(chunk.url);
-            });
+            if (canvasRecorder?.state === 'recording') canvasRecorder.stop();
+            if (stream) stream.getTracks().forEach(t => t.stop());
+            stopCanvasRecording();
+            recordedChunks.forEach(c => { if (c.url) URL.revokeObjectURL(c.url); });
         }
 
-        // Event listeners
+        setupLiveControls();
+        setupReplayControls();
         startBtn.addEventListener('click', startRecording);
         stopBtn.addEventListener('click', stopRecording);
         reviewBtn.addEventListener('click', reviewLast5Minutes);
         window.addEventListener('beforeunload', cleanup);
         
-        // Initial state
         statusDot.classList.remove('active');
         statusText.textContent = 'Stopped';
-        
-        console.log('Mini DRS System Ready - Professional Cricket Review System');
+        liveZoomPercent.textContent = '100%';
+        replayZoomPercent.textContent = '100%';
     })();
 </script>
 </body>
