@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Mini DRS - Cricket Replay System</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            user-select: none; /* Avoid accidental text selection on mobile */
+        }
+
+        body {
+            margin: 0;
+            padding: 16px;
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: #0a0f1e;
+            color: #f0f3fa;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Live Camera Card */
+        .live-card {
+            background: #121826;
+            border-radius: 28px;
+            overflow: hidden;
+            box-shadow: 0 12px 24px rgba(0,0,0,0.4);
+            margin-bottom: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .camera-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 18px;
+            background: #0b0f17;
+            border-bottom: 1px solid #2a2f3c;
+        }
+
+        .title {
+            font-weight: 600;
+            font-size: 1.2rem;
+            letter-spacing: -0.3px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .record-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #1e2434;
+            padding: 5px 12px;
+            border-radius: 40px;
+            font-size: 0.8rem;
+        }
+
+        .led {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: #2ecc71;
+            box-shadow: 0 0 5px #2ecc71;
+            animation: pulse 1.2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.4; transform: scale(0.9);}
+            100% { opacity: 1; transform: scale(1.2);}
+        }
+
+        .video-wrapper {
+            position: relative;
+            background: #000;
+            width: 100%;
+            aspect-ratio: 16 / 9;
+        }
+
+        #liveVideo {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transform: scaleX(1); /* rear camera natural orientation, no mirror */
+        }
+
+        .controls {
+            padding: 14px;
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        button {
+            background: #2c3e66;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 60px;
+            font-size: 1rem;
+            font-weight: 500;
+            color: white;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            touch-action: manipulation;
+        }
+
+        button:active {
+            transform: scale(0.96);
+            background: #1f2c48;
+        }
+
+        .review-btn {
+            background: #e67e22;
+            font-weight: bold;
+        }
+
+        .replay-card {
+            background: #121826;
+            border-radius: 28px;
+            margin-top: 16px;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .replay-header {
+            padding: 12px 18px;
+            background: #0b0f17;
+            font-weight: 600;
+            border-bottom: 1px solid #2a2f3c;
+        }
+
+        #replayPlayer {
+            width: 100%;
+            background: #000;
+            aspect-ratio: 16 / 9;
+            object-fit: contain;
+        }
+
+        .frame-controls {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            padding: 12px;
+            background: #0e121c;
+            flex-wrap: wrap;
+        }
+
+        .frame-btn {
+            background: #1e2a3a;
+            padding: 8px 18px;
+            font-size: 0.9rem;
+        }
+
+        .time-info {
+            text-align: center;
+            font-size: 0.75rem;
+            padding: 8px;
+            color: #9aa4bf;
+            font-family: monospace;
+        }
+
+        .error-msg {
+            background: #c0392b;
+            margin: 12px;
+            padding: 10px;
+            border-radius: 20px;
+            text-align: center;
+            font-size: 0.8rem;
+        }
+
+        .permission-pending {
+            background: #2c3e66;
+            margin: 12px;
+            padding: 12px;
+            border-radius: 28px;
+            text-align: center;
+        }
+
+        footer {
+            font-size: 0.7rem;
+            text-align: center;
+            margin-top: 20px;
+            opacity: 0.6;
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 12px;
+            }
+            button {
+                padding: 8px 18px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="live-card">
+        <div class="camera-header">
+            <div class="title">📹 DRS Review System</div>
+            <div class="record-indicator">
+                <span class="led"></span>
+                <span>BUFFERING 5min</span>
+            </div>
+        </div>
+        <div class="video-wrapper">
+            <video id="liveVideo" autoplay playsinline muted></video>
+        </div>
+        <div class="controls">
+            <button id="reviewBtn" class="review-btn">⚡ REVIEW LAST 5min</button>
+        </div>
+    </div>
+
+    <div class="replay-card" id="replayCard" style="display: none;">
+        <div class="replay-header">🎬 REPLAY (Frame by Frame)</div>
+        <video id="replayPlayer" controls playsinline></video>
+        <div class="frame-controls">
+            <button id="prevFrameBtn" class="frame-btn">⏪ Prev Frame</button>
+            <button id="nextFrameBtn" class="frame-btn">Next Frame ⏩</button>
+        </div>
+        <div class="time-info" id="frameTimeInfo">⏱️ Frame: -- / --</div>
+    </div>
+    <div id="errorMessage" style="display: none;" class="error-msg"></div>
+    <footer>⚡ Rolling buffer (last 5 min) | MediaRecorder chunks ~2 sec | Frame stepping uses canvas</footer>
+</div>
+
+<script>
+    (function(){
+        // ---------- DOM Elements ----------
+        const liveVideo = document.getElementById('liveVideo');
+        const reviewBtn = document.getElementById('reviewBtn');
+        const replayPlayer = document.getElementById('replayPlayer');
+        const replayCard = document.getElementById('replayCard');
+        const prevFrameBtn = document.getElementById('prevFrameBtn');
+        const nextFrameBtn = document.getElementById('nextFrameBtn');
+        const frameTimeInfo = document.getElementById('frameTimeInfo');
+        const errorDiv = document.getElementById('errorMessage');
+
+        // ---------- Rolling Buffer ----------
+        let mediaRecorder = null;
+        let recordedChunksQueue = [];     // Array of Blob chunks (each ~2 seconds)
+        let totalBufferDurationSec = 0;    // total duration of stored chunks in seconds
+        const MAX_BUFFER_DURATION_SEC = 300; // 5 minutes = 300 seconds
+
+        // For accurate duration tracking: we store chunk duration metadata
+        // each element: { blob, durationSec }
+        let chunksMeta = [];
+
+        let isRecording = false;
+        let stream = null;
+        let chunkInterval = null;     // interval to stop/start recorder for chunked recording
+        let currentRecorder = null;    // active MediaRecorder instance
+
+        // Chunk duration target: 2 seconds (balanced for mobile performance)
+        const CHUNK_DURATION_MS = 2000;
+
+        // Frame stepping canvas variables
+        let frameCanvas = null;          // hidden canvas for frame extraction
+        let frameInterval = null;        // for frame stepping logic
+        let isFrameSteppingActive = false;
+
+        // ---------- Helper: Show Errors ----------
+        function showError(msg) {
+            errorDiv.innerText = `⚠️ ${msg}`;
+            errorDiv.style.display = 'block';
+            setTimeout(() => {
+                errorDiv.style.display = 'none';
+            }, 4000);
+            console.error(msg);
+        }
+
+        // ---------- Cleanup old chunks beyond 5min ----------
+        function enforceBufferLimit() {
+            while (totalBufferDurationSec > MAX_BUFFER_DURATION_SEC && chunksMeta.length > 0) {
+                const removed = chunksMeta.shift();
+                totalBufferDurationSec -= removed.durationSec;
+                // free blob reference
+                if (removed.blob) {
+                    URL.revokeObjectURL(URL.createObjectURL(removed.blob)); // optional cleanup, but not holding URL
+                }
+            }
+            // additional safety: if queue length too high but duration mismatch, recalc
+            if (chunksMeta.length > 0 && totalBufferDurationSec > MAX_BUFFER_DURATION_SEC + 5) {
+                // fallback recalc
+                let sum = 0;
+                for(let m of chunksMeta) sum += m.durationSec;
+                totalBufferDurationSec = sum;
+                while (totalBufferDurationSec > MAX_BUFFER_DURATION_SEC && chunksMeta.length) {
+                    const r = chunksMeta.shift();
+                    totalBufferDurationSec -= r.durationSec;
+                }
+            }
+        }
+
+        // ---------- Append a new chunk blob with estimated duration ----------
+        function appendChunk(blob) {
+            if (!blob || blob.size === 0) return;
+            // Estimate duration: we assume chunk is approximately CHUNK_DURATION_MS seconds
+            // MediaRecorder may produce slightly variable length, but using target duration is safe for rolling window.
+            // To be more accurate, we can derive from timestamps but that's complex; for MVP, fixed approx works.
+            let duration = CHUNK_DURATION_MS / 1000; 
+            // edge case: if blob size extremely tiny (maybe last chunk incomplete), still treat as same duration.
+            chunksMeta.push({ blob: blob, durationSec: duration });
+            totalBufferDurationSec += duration;
+            enforceBufferLimit();
+        }
+
+        // ---------- Setup Recorder with circular buffer (stop/start each chunk) ----------
+        async function startCircularRecording(mediaStream) {
+            if (mediaRecorder && mediaRecorder.state === 'recording') {
+                try { mediaRecorder.stop(); } catch(e) {}
+            }
+            // function to create new recorder and record for fixed duration
+            function createRecorderAndRecord() {
+                if (!stream || stream.active === false) return;
+                try {
+                    const options = { mimeType: 'video/mp4' };
+                    // Fallback for Safari: 'video/mp4' works; if not supported, use default
+                    let mime = MediaRecorder.isTypeSupported('video/mp4') ? 'video/mp4' : '';
+                    const recorder = new MediaRecorder(stream, mime ? { mimeType: mime } : undefined);
+                    currentRecorder = recorder;
+                    let chunksLocal = [];
+                    
+                    recorder.ondataavailable = (event) => {
+                        if (event.data && event.data.size > 0) {
+                            chunksLocal.push(event.data);
+                        }
+                    };
+                    
+                    recorder.onstop = () => {
+                        if (chunksLocal.length) {
+                            const finalBlob = new Blob(chunksLocal, { type: 'video/mp4' });
+                            appendChunk(finalBlob);
+                        }
+                        // schedule next chunk after a short delay (ensure smooth)
+                        if (isRecording && stream && stream.active) {
+                            if (chunkInterval) clearTimeout(chunkInterval);
+                            chunkInterval = setTimeout(() => {
+                                if (isRecording && stream && stream.active) {
+                                    createRecorderAndRecord();
+                                }
+                            }, 50);
+                        }
+                    };
+                    
+                    recorder.start();
+                    // stop after CHUNK_DURATION_MS
+                    setTimeout(() => {
+                        if (recorder.state === 'recording') {
+                            recorder.stop();
+                        }
+                    }, CHUNK_DURATION_MS);
+                } catch (err) {
+                    console.warn("Recorder error:", err);
+                    showError("MediaRecorder error: " + err.message);
+                }
+            }
+            
+            if (isRecording) {
+                createRecorderAndRecord();
+            }
+        }
+
+        // ---------- Stop entire recording and clear buffer ----------
+        function stopRecordingAndClear() {
+            isRecording = false;
+            if (chunkInterval) {
+                clearTimeout(chunkInterval);
+                chunkInterval = null;
+            }
+            if (currentRecorder && currentRecorder.state === 'recording') {
+                try { currentRecorder.stop(); } catch(e) {}
+            }
+            if (mediaRecorder) mediaRecorder = null;
+            // clear buffer queue
+            recordedChunksQueue = [];
+            chunksMeta = [];
+            totalBufferDurationSec = 0;
+        }
+
+        // ---------- Combine all buffered blobs into one video Blob ----------
+        async function getCombinedVideoBlob() {
+            if (!chunksMeta.length) {
+                throw new Error("No recorded video buffer available (less than 5min data?)");
+            }
+            const blobs = chunksMeta.map(item => item.blob);
+            // Combine blobs into single video
+            const combinedBlob = new Blob(blobs, { type: 'video/mp4' });
+            return combinedBlob;
+        }
+
+        // ---------- Frame stepping logic using canvas & video element ----------
+        async function setupFrameStepping(videoElement) {
+            if (!frameCanvas) {
+                frameCanvas = document.createElement('canvas');
+                frameCanvas.style.display = 'none';
+                document.body.appendChild(frameCanvas);
+            }
+            // Ensure video metadata loaded
+            return new Promise((resolve) => {
+                if (videoElement.readyState >= 1) {
+                    resolve();
+                } else {
+                    videoElement.addEventListener('loadedmetadata', () => resolve(), { once: true });
+                }
+            });
+        }
+
+        let currentFrameIndex = 0;
+        let totalFramesEstimate = 0;
+        let frameStepVideo = null; // reference to current replay video
+
+        function updateFrameInfo(currentTime, duration) {
+            if (!duration || isNaN(duration)) {
+                frameTimeInfo.innerText = `⏱️ Frame: -- / --`;
+                return;
+            }
+            // approximate frames at 30fps (common for video recording)
+            const fpsEstimate = 30;
+            const totalFrames = Math.floor(duration * fpsEstimate);
+            const currentFrame = Math.floor(currentTime * fpsEstimate);
+            frameTimeInfo.innerText = `⏱️ Frame ~${currentFrame+1} / ${totalFrames}  |  Time: ${currentTime.toFixed(2)}s`;
+        }
+
+        function goToPreviousFrame() {
+            if (!frameStepVideo || !frameStepVideo.duration || isNaN(frameStepVideo.duration)) return;
+            let newTime = frameStepVideo.currentTime - (1/30);
+            if (newTime < 0) newTime = 0;
+            frameStepVideo.currentTime = newTime;
+            frameStepVideo.pause();
+            updateFrameInfo(frameStepVideo.currentTime, frameStepVideo.duration);
+        }
+        
+        function goToNextFrame() {
+            if (!frameStepVideo || !frameStepVideo.duration || isNaN(frameStepVideo.duration)) return;
+            let newTime = frameStepVideo.currentTime + (1/30);
+            if (newTime > frameStepVideo.duration) newTime = frameStepVideo.duration;
+            frameStepVideo.currentTime = newTime;
+            frameStepVideo.pause();
+            updateFrameInfo(frameStepVideo.currentTime, frameStepVideo.duration);
+        }
+
+        function attachFrameControls(videoElement) {
+            frameStepVideo = videoElement;
+            // Remove old listeners and add new
+            const newPrev = prevFrameBtn.cloneNode(true);
+            const newNext = nextFrameBtn.cloneNode(true);
+            prevFrameBtn.parentNode.replaceChild(newPrev, prevFrameBtn);
+            nextFrameBtn.parentNode.replaceChild(newNext, nextFrameBtn);
+            
+            const finalPrev = document.getElementById('prevFrameBtn');
+            const finalNext = document.getElementById('nextFrameBtn');
+            
+            const onTimeUpdate = () => {
+                if (frameStepVideo && frameStepVideo.duration) {
+                    updateFrameInfo(frameStepVideo.currentTime, frameStepVideo.duration);
+                }
+            };
+            videoElement.addEventListener('timeupdate', onTimeUpdate);
+            videoElement.addEventListener('seeked', onTimeUpdate);
+            
+            finalPrev.onclick = (e) => {
+                e.preventDefault();
+                goToPreviousFrame();
+            };
+            finalNext.onclick = (e) => {
+                e.preventDefault();
+                goToNextFrame();
+            };
+            // initial update
+            if (videoElement.readyState >= 1) {
+                updateFrameInfo(videoElement.currentTime, videoElement.duration);
+            } else {
+                videoElement.addEventListener('loadedmetadata', () => {
+                    updateFrameInfo(videoElement.currentTime, videoElement.duration);
+                }, { once: true });
+            }
+        }
+
+        // ---------- Review: Build replay from buffer ----------
+        async function reviewLast5Minutes() {
+            if (!chunksMeta.length) {
+                showError("Buffer is empty. Wait at least a few seconds for recording.");
+                return;
+            }
+            try {
+                reviewBtn.disabled = true;
+                reviewBtn.innerText = "⏳ Merging replay...";
+                const combinedBlob = await getCombinedVideoBlob();
+                const videoURL = URL.createObjectURL(combinedBlob);
+                replayPlayer.src = videoURL;
+                replayCard.style.display = 'block';
+                // clean up old URL on next reload
+                const oldSrc = replayPlayer.src;
+                replayPlayer.onloadeddata = () => {
+                    if (oldSrc && oldSrc !== replayPlayer.src) URL.revokeObjectURL(oldSrc);
+                };
+                await replayPlayer.play();
+                // Wait for metadata then attach frame controls
+                await setupFrameStepping(replayPlayer);
+                attachFrameControls(replayPlayer);
+                reviewBtn.disabled = false;
+                reviewBtn.innerText = "⚡ REVIEW LAST 5min";
+                // scroll to replay
+                replayCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            } catch (err) {
+                showError("Replay failed: " + err.message);
+                reviewBtn.disabled = false;
+                reviewBtn.innerText = "⚡ REVIEW LAST 5min";
+                console.error(err);
+            }
+        }
+
+        // ---------- Camera Initialization with rear camera preference ----------
+        async function initCamera() {
+            // Prefer rear camera: environment facing mode
+            const constraints = {
+                video: {
+                    facingMode: { exact: "environment" }   // rear camera on mobile
+                },
+                audio: false
+            };
+            // Fallback if rear camera fails: just any camera
+            try {
+                stream = await navigator.mediaDevices.getUserMedia(constraints);
+            } catch (err) {
+                console.warn("Rear camera not available, falling back to default cam", err);
+                try {
+                    stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+                } catch (fallbackErr) {
+                    throw new Error("Camera permission denied or no camera found");
+                }
+            }
+            liveVideo.srcObject = stream;
+            await liveVideo.play().catch(e => console.warn(e));
+            return stream;
+        }
+
+        // ---------- Start the rolling buffer system ----------
+        async function startSystem() {
+            try {
+                const mediaStream = await initCamera();
+                stream = mediaStream;
+                isRecording = true;
+                // start circular chunk recording
+                startCircularRecording(stream);
+            } catch (err) {
+                showError("Cannot access camera: " + err.message);
+                console.error(err);
+            }
+        }
+
+        // ---------- Clean up on page unload (free resources) ----------
+        function cleanup() {
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+            }
+            if (chunkInterval) clearTimeout(chunkInterval);
+            if (currentRecorder && currentRecorder.state === 'recording') {
+                try { currentRecorder.stop(); } catch(e) {}
+            }
+            isRecording = false;
+        }
+
+        // ---------- Additional safety: monitor memory & reload buffer metadata trimming ----------
+        setInterval(() => {
+            // extra periodic buffer cleanup
+            if (chunksMeta.length > 0 && totalBufferDurationSec > MAX_BUFFER_DURATION_SEC + 10) {
+                enforceBufferLimit();
+            }
+        }, 30000);
+
+        // ---------- Handle visibility change (pause recorder when tab hidden to save resources) ----------
+        function handleVisibilityChange() {
+            if (document.hidden) {
+                // optionally pause recording? but we keep minimal buffer, but for stability we can pause mediaRecorder chain.
+                if (currentRecorder && currentRecorder.state === 'recording') {
+                    // Do not stop abruptly to avoid incomplete chunks. but we can throttle.
+                }
+            } else {
+                // if recording flag true and stream active, ensure recorder is running
+                if (isRecording && stream && stream.active && (!currentRecorder || currentRecorder.state !== 'recording')) {
+                    startCircularRecording(stream);
+                }
+            }
+        }
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+        
+        // ---------- Event Listeners ----------
+        reviewBtn.addEventListener('click', reviewLast5Minutes);
+        
+        // Fallback: if user clicks replay video controls and wants to combine frame stepping still works
+        // Also handle permission errors nicely
+        window.addEventListener('load', () => {
+            startSystem().catch(err => {
+                showError("Failed to start camera: " + err.message);
+            });
+        });
+        
+        window.addEventListener('beforeunload', () => {
+            if (stream) {
+                stream.getTracks().forEach(t => t.stop());
+            }
+            cleanup();
+        });
+        
+        // additional: allow long press menu prevention on buttons
+        const allBtns = document.querySelectorAll('button');
+        allBtns.forEach(btn => {
+            btn.addEventListener('contextmenu', (e) => e.preventDefault());
+        });
+        
+        // Expose some helpful status for debugging but not needed
+        console.log("Mini DRS system ready. Rolling buffer 5min, chunk duration ~2s");
+    })();
+</script>
+</body>
+</html>
